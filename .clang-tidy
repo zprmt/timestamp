@@ -11,7 +11,7 @@ Checks: >
     -readability-magic-numbers,
     bugprone-*,
 WarningsAsErrors: '*'
-HeaderFilterRegex: ''
+HeaderFilterRegex: 'src/.*'
 FormatStyle: file
 CheckOptions:
     readability-function-cognitive-complexity.Threshold: 20
