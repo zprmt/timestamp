@@ -57,14 +57,14 @@ Options)");
 
     po::store(po::command_line_parser(argc, argv).options(all).positional(pos).run(), var_map);
 
-    if (var_map.contains("help")) {
+    if (var_map.count("help") != 0) {
         std::cout << desc;
         std::exit(0);
     }
 
     po::notify(var_map);
 
-    if (!var_map.contains("search-dirs")) {
+    if (var_map.count("search-dirs") == 0) {
         config.directories = {"."};
     } else {
         config.directories = var_map["search-dirs"].as<std::vector<std::string>>();
