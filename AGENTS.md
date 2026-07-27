@@ -13,7 +13,7 @@ The code itself (`src/timestamp.cpp`) is a deliberately small, single-file tool 
 ## Current state
 
 - Single file `src/timestamp.cpp`
-- No `CMakeLists.txt` yet
+- `CMakeLists.txt` — done
 - Single git commit
 - No CI workflows
 
