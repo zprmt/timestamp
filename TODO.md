@@ -4,4 +4,4 @@
 - [ ] Add `.clang-format` and `.clang-tidy` configs
 - [ ] Create `.github/workflows/build.yml` — build on Ubuntu (and maybe macOS/Windows)
 - [ ] Remove the committed binary in `bin/` and add `bin/` to `.gitignore`
-- [ ] Add smoke tests (shell script or CTest)
+- [x] Add smoke tests (shell script or CTest)

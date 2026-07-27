@@ -12,6 +12,8 @@ set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_VERBOSE_MAKEFILE ON)
 
+enable_testing()
+
 find_package(Boost REQUIRED COMPONENTS program_options regex)
 
 add_executable(timestamp src/timestamp.cpp)
@@ -22,3 +24,10 @@ target_link_libraries(timestamp PRIVATE
 )
 
 install(TARGETS timestamp RUNTIME DESTINATION bin)
+
+add_test(NAME smoke
+    COMMAND ${CMAKE_SOURCE_DIR}/cmake/tests/smoke.sh
+        $<TARGET_FILE:timestamp>
+        ${CMAKE_SOURCE_DIR}
+    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+)
