@@ -8,6 +8,8 @@ This is a learning project. The primary goals are:
 
 3. **Practice modern C++** — use C++23 features (`std::filesystem`, `std::format`) alongside real Boost libraries.
 
+Remember to explain any actions you do related to CMake and GitHub Actions to the user.
+
 The code itself (`src/timestamp.cpp`) is a deliberately small, single-file tool so that build-system and CI concerns are the focus, not application complexity.
 
 ## Current state
