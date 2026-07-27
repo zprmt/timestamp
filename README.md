@@ -34,17 +34,39 @@ timestamp -e '\.git' /some   # exclude pattern
 ## Build
 
 ```bash
-# Configure
+# Configure (generates build system in the build/ directory)
 cmake -B build -DCMAKE_BUILD_TYPE=Debug
 
-# Build
+# Build (compiles the binary: build/timestamp)
 cmake --build build
 
-# Build (release)
+# Build (release — optimised, no debug symbols)
 cmake --build build --config Release
 
-# Install
+# Install (copies the binary to PREFIX/bin/timestamp; default PREFIX=/usr/local)
 cmake --install build
+
+# Install locally (PREFIX = project root → ./bin/timestamp)
+cmake --install build --prefix .
+```
+
+## Test
+
+```bash
+# Run smoke tests with CTest
+ctest --test-dir build --output-on-failure
+```
+
+`--output-on-failure` prints test output only when a test fails; on success it stays silent.
+
+### Manual smoke test
+
+```bash
+./build/timestamp                    # current dir (expected: exits 0, prints a date)
+./build/timestamp --help             # expected: exits 0, prints usage
+./build/timestamp /nonexistent       # expected: exits 1, error on stderr
+./build/timestamp -v src/            # expected: verbose output on stderr
+./build/timestamp -e '\.cpp' src/    # expected: filters out .cpp files
 ```
 
 ### Manual build (without CMake)
