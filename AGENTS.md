@@ -18,7 +18,7 @@ The code itself (`src/timestamp.cpp`) is a deliberately small, single-file tool 
 - `CMakeLists.txt` — done
 - Smoke tests in `cmake/tests/`
 - Single git commit
-- No CI workflows
+- CI workflow in `.github/workflows/build.yml` — build + test on push/PR
 
 ## Things to do
 
