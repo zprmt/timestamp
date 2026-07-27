@@ -8,22 +8,49 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
 
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install dependencies
+      - name: Install dependencies (Linux)
+        if: runner.os == 'Linux'
         run: sudo apt-get update && sudo apt-get install -y libboost-all-dev
 
-      - name: Configure
+      - name: Install dependencies (Windows)
+        if: runner.os == 'Windows'
+        run: vcpkg install boost-program-options boost-regex
+
+      - name: Configure (Linux)
+        if: runner.os == 'Linux'
         run: cmake -B build -DCMAKE_BUILD_TYPE=Release
 
+      - name: Configure (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          cmake -B build `
+            -DCMAKE_BUILD_TYPE=Release `
+            -DCMAKE_TOOLCHAIN_FILE="$env:VCPKG_ROOT\scripts\buildsystems\vcpkg.cmake"
+
       - name: Build
-        run: cmake --build build
+        run: cmake --build build --config Release
 
       - name: Test
-        run: ctest --test-dir build --output-on-failure
+        if: runner.os == 'Linux'
+        run: ctest --test-dir build --output-on-failure --config Release
+
+      - name: Test (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          $exe = if (Test-Path "build\Release\timestamp.exe") { "build\Release\timestamp.exe" }
+                 else { "build\Debug\timestamp.exe" }
+          & $exe --help
+          if ($LASTEXITCODE -ne 0) { throw "timestamp --help exited $LASTEXITCODE" }
 
   format:
     runs-on: ubuntu-latest

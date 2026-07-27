@@ -25,9 +25,11 @@ target_link_libraries(timestamp PRIVATE
 
 install(TARGETS timestamp RUNTIME DESTINATION bin)
 
-add_test(NAME smoke
-    COMMAND ${CMAKE_SOURCE_DIR}/cmake/tests/smoke.sh
-        $<TARGET_FILE:timestamp>
-        ${CMAKE_SOURCE_DIR}
-    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
-)
+if(CMAKE_HOST_SYSTEM_NAME STREQUAL "Linux")
+    add_test(NAME smoke
+        COMMAND ${CMAKE_SOURCE_DIR}/cmake/tests/smoke.sh
+            $<TARGET_FILE:timestamp>
+            ${CMAKE_SOURCE_DIR}
+        WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+    )
+endif()
