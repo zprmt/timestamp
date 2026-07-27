@@ -45,12 +45,7 @@ jobs:
 
       - name: Test (Windows)
         if: runner.os == 'Windows'
-        shell: pwsh
-        run: |
-          $exe = if (Test-Path "build\Release\timestamp.exe") { "build\Release\timestamp.exe" }
-                 else { "build\Debug\timestamp.exe" }
-          & $exe --help
-          if ($LASTEXITCODE -ne 0) { throw "timestamp --help exited $LASTEXITCODE" }
+        run: ctest --test-dir build --output-on-failure --config Release
 
   format:
     runs-on: ubuntu-latest
