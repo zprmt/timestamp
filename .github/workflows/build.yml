@@ -41,7 +41,7 @@ jobs:
 
       - name: Test
         if: runner.os == 'Linux'
-        run: ctest --test-dir build --output-on-failure --config Release
+        run: ctest --test-dir build --output-on-failure
 
       - name: Test (Windows)
         if: runner.os == 'Windows'
