@@ -29,7 +29,14 @@ timestamp -e '\.git' /some   # exclude pattern
 
 - C++23 compiler (GCC 14+, Clang 18+)
 - Boost (program_options, regex)
-- CMake 3.30+
+- CMake 3.20+
+- clang-tidy 22+ (for linting, optional)
+
+  ```bash
+  # Install pinned clang-tidy (Ubuntu/Debian)
+  curl -fsSL https://apt.llvm.org/llvm.sh | sudo bash -s -- 22
+  sudo apt-get install -y clang-tidy-22
+  ```
 
 ## Build
 
