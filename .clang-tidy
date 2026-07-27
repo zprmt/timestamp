@@ -1,0 +1,18 @@
+---
+Checks: >
+    clang-diagnostic-*,
+    clang-analyzer-*,
+    modernize-*,
+    -modernize-use-trailing-return-type,
+    -modernize-avoid-c-arrays,
+    performance-*,
+    readability-*,
+    -readability-identifier-length,
+    -readability-magic-numbers,
+    bugprone-*,
+WarningsAsErrors: '*'
+HeaderFilterRegex: ''
+FormatStyle: file
+CheckOptions:
+    readability-function-cognitive-complexity.Threshold: 20
+...

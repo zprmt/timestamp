@@ -85,8 +85,23 @@ run-clang-tidy -p build
 
 ## Format
 
+The project uses Google style (4-space indent, 120 column limit), defined in `.clang-format`.
+
+The CI `format` job runs `clang-format --dry-run --Werror` and fails if any file doesn't match. Check formatting locally with:
+
 ```bash
-find src/ -name '*.cpp' -o -name '*.hpp' | xargs clang-format -i -style=file
+# Check (exit 0 = clean, exit 1 = changes needed)
+clang-format --dry-run --Werror src/timestamp.cpp
+
+# Auto-format in-place
+clang-format -i src/timestamp.cpp
+
+# Format all source files
+find src/ -name '*.cpp' -o -name '*.hpp' | xargs clang-format -i
+
+# Format only lines changed vs. HEAD (git clang-format)
+git clang-format            # unstaged changes
+git clang-format --staged   # staged changes, before commit
 ```
 
 ## License

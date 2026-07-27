@@ -24,3 +24,23 @@ jobs:
 
       - name: Test
         run: ctest --test-dir build --output-on-failure
+
+  format:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install clang-format
+        run: sudo apt-get update && sudo apt-get install -y clang-format
+      - name: Check formatting
+        run: find src/ -name '*.cpp' -o -name '*.hpp' | xargs clang-format --dry-run --Werror
+
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install dependencies
+        run: sudo apt-get update && sudo apt-get install -y libboost-all-dev
+      - name: Configure (compile commands)
+        run: cmake -B build -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DCMAKE_BUILD_TYPE=Release
+      - name: Run clang-tidy
+        run: find src/ -name '*.cpp' | xargs clang-tidy --warnings-as-errors='*' -p build
