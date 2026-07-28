@@ -45,7 +45,7 @@ jobs:
 
       - name: Test (Windows)
         if: runner.os == 'Windows'
-        run: ctest --test-dir build --output-on-failure --config Release
+        run: ctest --test-dir build --output-on-failure -C Release
 
   format:
     runs-on: ubuntu-latest
