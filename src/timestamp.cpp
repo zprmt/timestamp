@@ -1,18 +1,18 @@
 /*
- * timestamp.cpp — reference implementation
+ * timestamp.cpp
  *
  * Licensed under CC0 1.0 Universal — do with it as you like.
  * https://creativecommons.org/publicdomain/zero/1.0/
  */
 
+#include <boost/program_options.hpp>
+#include <boost/regex.hpp>
 #include <filesystem>
 #include <format>
 #include <iostream>
-// Is actually needed for file_time_type formatting, but clang-tidy doesn't see it
-// NOLINTNEXTLINE(unused-include)
-#include <boost/program_options.hpp>
-#include <boost/regex.hpp>
-#include <chrono>
+// Is actually needed for file_time_type formatting, but clangd doesn't see it
+#include <chrono>  // IWYU pragma: keep
+#include <span>
 #include <vector>
 
 /*
@@ -30,7 +30,7 @@ struct Config {
     bool verbose = false;
 };
 
-Config parse_arguments(int argc, char* argv[]) {
+Config parse_arguments(std::span<char*> args) {
     Config config;
     std::string exclude;
 
@@ -55,8 +55,25 @@ Options)");
 
     po::variables_map var_map;
 
-    po::store(po::command_line_parser(argc, argv).options(all).positional(pos).run(), var_map);
+    po::store(po::command_line_parser(static_cast<int>(args.size()), args.data()).options(all).positional(pos).run(),
+              var_map);
 
+    // std::map::contains() is C++20, and MSVC marks it dllimport but doesn't
+    // export it from its runtime DLL (or the installed version on the runner
+    // doesn't have it).
+    //
+    // After further research done by Claude: this isn't actually about a
+    // missing/outdated runtime DLL. boost::program_options::variables_map is
+    // declared dllimport because of BOOST_PROGRAM_OPTIONS_DYN_LINK, and it
+    // derives from std::map<...>. MSVC propagates a class's dllimport
+    // attribute onto its inherited members too, so the compiler tries to
+    // import std::map::contains() from boost_program_options.dll instead of
+    // compiling it locally like a normal header-only STL function. Boost's
+    // DLL never exported that symbol (it's not Boost's to export), so the
+    // link always fails here, regardless of vcpkg/MSVC version.
+    //
+    // So this will fix itself when we move to statically linking boost.
+    // NOLINTNEXTLINE(readability-container-contains)
     if (var_map.count("help") != 0) {
         std::cout << desc;
         std::exit(0);
@@ -64,6 +81,8 @@ Options)");
 
     po::notify(var_map);
 
+    // See comment above
+    // NOLINTNEXTLINE(readability-container-contains)
     if (var_map.count("search-dirs") == 0) {
         config.directories = {"."};
     } else {
@@ -100,7 +119,7 @@ std::filesystem::file_time_type calculate_timestamp(const Config& config) {
 
 int main(int argc, char* argv[]) {
     try {
-        Config config = parse_arguments(argc, argv);
+        Config config = parse_arguments(std::span<char*>(argv, static_cast<std::size_t>(argc)));
         auto timestamp = calculate_timestamp(config);
         std::cout << std::format("{}", timestamp) << '\n';
     } catch (std::exception& e) {
