@@ -32,6 +32,13 @@ if(CMAKE_HOST_SYSTEM_NAME STREQUAL "Linux")
             ${CMAKE_SOURCE_DIR}
         WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
     )
+elseif(CMAKE_HOST_SYSTEM_NAME STREQUAL "Darwin")
+    add_test(NAME smoke
+        COMMAND ${CMAKE_SOURCE_DIR}/cmake/tests/smoke.sh
+            $<TARGET_FILE:timestamp>
+            ${CMAKE_SOURCE_DIR}
+        WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+    )
 elseif(CMAKE_HOST_SYSTEM_NAME STREQUAL "Windows")
     add_test(NAME smoke
         COMMAND powershell -ExecutionPolicy Bypass -File

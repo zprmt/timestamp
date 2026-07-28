@@ -10,7 +10,7 @@ jobs:
   build:
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest]
+        os: [ubuntu-latest, macos-latest, windows-latest]
     runs-on: ${{ matrix.os }}
 
     steps:
@@ -20,12 +20,20 @@ jobs:
         if: runner.os == 'Linux'
         run: sudo apt-get update && sudo apt-get install -y libboost-all-dev
 
+      - name: Install dependencies (macOS)
+        if: runner.os == 'macOS'
+        run: brew install boost
+
       - name: Install dependencies (Windows)
         if: runner.os == 'Windows'
         run: vcpkg install boost-program-options boost-regex
 
       - name: Configure (Linux)
         if: runner.os == 'Linux'
+        run: cmake -B build -DCMAKE_BUILD_TYPE=Release
+
+      - name: Configure (macOS)
+        if: runner.os == 'macOS'
         run: cmake -B build -DCMAKE_BUILD_TYPE=Release
 
       - name: Configure (Windows)
@@ -41,6 +49,10 @@ jobs:
 
       - name: Test
         if: runner.os == 'Linux'
+        run: ctest --test-dir build --output-on-failure -C Release
+
+      - name: Test (macOS)
+        if: runner.os == 'macOS'
         run: ctest --test-dir build --output-on-failure -C Release
 
       - name: Test (Windows)
