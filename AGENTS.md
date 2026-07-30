@@ -14,6 +14,20 @@ Remember to explain any actions you do related to CMake and GitHub Actions to th
 
 The code itself (`src/timestamp.cpp`) is a deliberately small, single-file tool so that build-system and CI concerns are the focus, not application complexity.
 
+## Git workflow
+
+- **Branches**: each task gets a `feat/`, `fix/`, or `chore/` branch (e.g. `feat/static-boost-linkage`).
+- **No direct pushes to `main`** — all changes go through a pull request.
+- **PRs require CI to pass** before merging (status checks are enforced on the repository).
+- **Merge strategy**: fast-forward only (`git merge --ff-only`). If the branch has diverged, rebase it onto main first:
+  ```bash
+  git checkout feat/my-thing
+  git rebase main
+  git checkout main
+  git merge --ff-only feat/my-thing
+  ```
+- **Single-commit history** — squash multiple WIP commits into one before merging.
+
 ## Current state
 
 - Single file `src/timestamp.cpp`
