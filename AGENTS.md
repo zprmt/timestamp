@@ -17,16 +17,18 @@ The code itself (`src/timestamp.cpp`) is a deliberately small, single-file tool 
 ## Git workflow
 
 - **Branches**: each task gets a `feat/`, `fix/`, or `chore/` branch (e.g. `feat/static-boost-linkage`).
-- **No direct pushes to `main`** — all changes go through a pull request.
-- **PRs require CI to pass** before merging (status checks are enforced on the repository).
-- **Merge strategy**: fast-forward only (`git merge --ff-only`). If the branch has diverged, rebase it onto main first:
+- **No direct pushes to `main`** — enforced by branch protection: pull requests are required, `main` needs 1 approving review, and `enforce_admins` is on, so even the repo owner cannot push straight to `main`.
+- **Reviewers**: PRs are reviewed by the second account `orange-crow-code` (simulates a real team; that account needs write access to the repo). Request the review only once CI is green.
+- **PRs require CI to pass** before merging — required checks: `format`, `lint`, and `build` on `ubuntu-latest`, `macos-latest`, and `windows-latest`.
+- **Merge strategy**: merge through the GitHub PR UI using **Squash and merge**. The repo enforces `required_linear_history`, so merge commits are not allowed, and a local `git merge --ff-only` followed by `git push` no longer works because pushes to `main` are blocked by protection. Squash and merge folds the branch into a single commit on `main`; the commit message is authored in the merge dialog.
+- **Keep the PR up to date**: `strict` status checks require the branch to be rebased on the latest `main` before merging:
   ```bash
   git checkout feat/my-thing
   git rebase main
-  git checkout main
-  git merge --ff-only feat/my-thing
+  git push --force-with-lease
   ```
-- **Single-commit history** — squash multiple WIP commits into one before merging.
+- **No pushes after approval**: the repo sets `dismiss_stale_reviews`, so any new push dismisses the reviewer's approval and re-triggers CI. Finalize the code before requesting review.
+- **Single-commit history** — each PR lands on `main` as exactly one commit (via squash-and-merge); multiple WIP commits on the branch are fine and get squashed at merge time.
 
 ## Current state
 
