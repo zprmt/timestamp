@@ -62,11 +62,13 @@ Options)");
     // dynamically linked: BOOST_PROGRAM_OPTIONS_DYN_LINK makes variables_map
     // __declspec(dllimport), and MSVC propagates that to inherited std::map
     // members, so contains() would be imported from boost_program_options.dll,
-    // which doesn't export it. With static Boost (the default) there is no DLL
-    // and contains() compiles as ordinary inline STL code; with dynamic Boost
-    // we fall back to the portable count(). The TIMESTAMP_USE_STATIC_BOOST
-    // macro is defined by CMake only in the static configuration.
-#ifdef TIMESTAMP_USE_STATIC_BOOST
+    // which doesn't export it. The failure is Windows/MSVC-specific: on Linux
+    // and macOS contains() links fine even against dynamic Boost. So the
+    // portable count() fallback only matters when Boost is dynamic AND we are
+    // on Windows; everywhere else contains() is always used.
+    // TIMESTAMP_USE_STATIC_BOOST is defined by CMake only in the static
+    // configuration.
+#if defined(TIMESTAMP_USE_STATIC_BOOST) || !defined(_WIN32)
     if (var_map.contains("help")) {
 #else
     // NOLINTNEXTLINE(readability-container-contains)
@@ -78,7 +80,7 @@ Options)");
 
     po::notify(var_map);
 
-#ifdef TIMESTAMP_USE_STATIC_BOOST
+#if defined(TIMESTAMP_USE_STATIC_BOOST) || !defined(_WIN32)
     if (!var_map.contains("search-dirs")) {
 #else
     // NOLINTNEXTLINE(readability-container-contains)
