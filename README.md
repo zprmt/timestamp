@@ -57,6 +57,14 @@ cmake --install build
 cmake --install build --prefix .
 ```
 
+Boost is linked statically by default (`TIMESTAMP_STATIC_BOOST=ON`) to avoid a
+Windows/MSVC `dllimport` link issue with `std::map::contains()`. To use shared
+Boost libraries instead, configure with:
+
+```bash
+cmake -B build -DTIMESTAMP_STATIC_BOOST=OFF
+```
+
 ## Test
 
 ```bash
@@ -81,6 +89,14 @@ ctest --test-dir build --output-on-failure
 ```bash
 g++ -o timestamp.o -c -std=c++23 -I/path/to/boost src/timestamp.cpp
 g++ -o timestamp timestamp.o -L/path/to/boost/stage/lib -lboost_regex -lboost_program_options
+```
+
+(For the default static Boost build, link the archives directly instead:)
+
+```bash
+g++ -o timestamp -std=c++23 -I/path/to/boost src/timestamp.cpp \
+    /path/to/boost/stage/lib/libboost_regex.a \
+    /path/to/boost/stage/lib/libboost_program_options.a
 ```
 
 ## Lint / static analysis

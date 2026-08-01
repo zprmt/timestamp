@@ -58,32 +58,34 @@ Options)");
     po::store(po::command_line_parser(static_cast<int>(args.size()), args.data()).options(all).positional(pos).run(),
               var_map);
 
-    // std::map::contains() is C++20, and MSVC marks it dllimport but doesn't
-    // export it from its runtime DLL (or the installed version on the runner
-    // doesn't have it).
-    //
-    // After further research done by Claude: this isn't actually about a
-    // missing/outdated runtime DLL. boost::program_options::variables_map is
-    // declared dllimport because of BOOST_PROGRAM_OPTIONS_DYN_LINK, and it
-    // derives from std::map<...>. MSVC propagates a class's dllimport
-    // attribute onto its inherited members too, so the compiler tries to
-    // import std::map::contains() from boost_program_options.dll instead of
-    // compiling it locally like a normal header-only STL function. Boost's
-    // DLL never exported that symbol (it's not Boost's to export), so the
-    // link always fails here, regardless of vcpkg/MSVC version.
-    //
-    // So this will fix itself when we move to statically linking boost.
+    // variables_map::contains() fails to link on MSVC when Boost is
+    // dynamically linked: BOOST_PROGRAM_OPTIONS_DYN_LINK makes variables_map
+    // __declspec(dllimport), and MSVC propagates that to inherited std::map
+    // members, so contains() would be imported from boost_program_options.dll,
+    // which doesn't export it. The failure is Windows/MSVC-specific: on Linux
+    // and macOS contains() links fine even against dynamic Boost. So the
+    // portable count() fallback only matters when Boost is dynamic AND we are
+    // on Windows; everywhere else contains() is always used.
+    // TIMESTAMP_USE_STATIC_BOOST is defined by CMake only in the static
+    // configuration.
+#if defined(TIMESTAMP_USE_STATIC_BOOST) || !defined(_WIN32)
+    if (var_map.contains("help")) {
+#else
     // NOLINTNEXTLINE(readability-container-contains)
     if (var_map.count("help") != 0) {
+#endif
         std::cout << desc;
         std::exit(0);
     }
 
     po::notify(var_map);
 
-    // See comment above
+#if defined(TIMESTAMP_USE_STATIC_BOOST) || !defined(_WIN32)
+    if (!var_map.contains("search-dirs")) {
+#else
     // NOLINTNEXTLINE(readability-container-contains)
     if (var_map.count("search-dirs") == 0) {
+#endif
         config.directories = {"."};
     } else {
         config.directories = var_map["search-dirs"].as<std::vector<std::string>>();
