@@ -26,7 +26,7 @@ jobs:
 
       - name: Install dependencies (Windows)
         if: runner.os == 'Windows'
-        run: vcpkg install boost-program-options boost-regex
+        run: vcpkg install boost-program-options:x64-windows-static-md boost-regex:x64-windows-static-md
 
       - name: Configure (Linux)
         if: runner.os == 'Linux'
@@ -42,6 +42,7 @@ jobs:
         run: |
           cmake -B build `
             -DCMAKE_BUILD_TYPE=Release `
+            -DVCPKG_TARGET_TRIPLET=x64-windows-static-md `
             -DCMAKE_TOOLCHAIN_FILE="$env:VCPKG_INSTALLATION_ROOT\scripts\buildsystems\vcpkg.cmake"
 
       - name: Build

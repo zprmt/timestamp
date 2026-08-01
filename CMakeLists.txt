@@ -14,6 +14,17 @@ set(CMAKE_VERBOSE_MAKEFILE ON)
 
 enable_testing()
 
+# Boost is linked statically by default. With shared Boost on MSVC, the
+# program_options headers get BOOST_PROGRAM_OPTIONS_DYN_LINK and declare
+# variables_map as __declspec(dllimport); MSVC propagates that onto inherited
+# std::map members (e.g. contains()), which then fail to link because the Boost
+# DLL doesn't export them. Static Boost removes the DLL entirely.
+option(TIMESTAMP_STATIC_BOOST "Link Boost statically (avoids MSVC dllimport issues)" ON)
+if(TIMESTAMP_STATIC_BOOST)
+    # Read by find_package(Boost) below - must be set BEFORE the call.
+    set(Boost_USE_STATIC_LIBS ON)
+endif()
+
 find_package(Boost REQUIRED COMPONENTS program_options regex)
 
 add_executable(timestamp src/timestamp.cpp)
