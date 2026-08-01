@@ -34,7 +34,15 @@ jobs:
 
       - name: Configure (macOS)
         if: runner.os == 'macOS'
-        run: cmake -B build -DCMAKE_BUILD_TYPE=Release
+        run: |
+          # Static Boost.Regex is built against ICU, but Homebrew keeps icu4c
+          # keg-only: its libraries are not on the default linker path, so
+          # -licudata etc. can't resolve. Point the linker at the keg (resolved
+          # via `brew deps` so an icu4c@N version bump doesn't break this).
+          ICU4C_LIBDIR="$(brew --prefix "$(brew deps boost | grep '^icu4c')")/lib"
+          cmake -B build \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_EXE_LINKER_FLAGS="-L${ICU4C_LIBDIR}"
 
       - name: Configure (Windows)
         if: runner.os == 'Windows'
