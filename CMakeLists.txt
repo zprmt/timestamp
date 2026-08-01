@@ -29,6 +29,14 @@ find_package(Boost REQUIRED COMPONENTS program_options regex)
 
 add_executable(timestamp src/timestamp.cpp)
 
+if(TIMESTAMP_STATIC_BOOST)
+    # TIMESTAMP_USE_STATIC_BOOST tells timestamp.cpp which code path to take:
+    # variables_map::contains() only links when Boost is static (see the
+    # comment in timestamp.cpp). The macro name intentionally differs from the
+    # CMake option so the code isn't coupled to the option's spelling.
+    target_compile_definitions(timestamp PRIVATE TIMESTAMP_USE_STATIC_BOOST)
+endif()
+
 target_link_libraries(timestamp PRIVATE
     Boost::program_options
     Boost::regex

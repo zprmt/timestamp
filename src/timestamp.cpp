@@ -58,21 +58,32 @@ Options)");
     po::store(po::command_line_parser(static_cast<int>(args.size()), args.data()).options(all).positional(pos).run(),
               var_map);
 
-    // std::map::contains() used to fail to link on MSVC when Boost was
-    // dynamically linked: BOOST_PROGRAM_OPTIONS_DYN_LINK made variables_map
-    // __declspec(dllimport), and MSVC propagated that to inherited std::map
-    // members, so contains() was imported from boost_program_options.dll,
-    // which doesn't export it. Boost is now linked statically (see
-    // CMakeLists.txt), which removes the DLL and makes contains() compile as
-    // ordinary inline STL code.
+    // variables_map::contains() fails to link on MSVC when Boost is
+    // dynamically linked: BOOST_PROGRAM_OPTIONS_DYN_LINK makes variables_map
+    // __declspec(dllimport), and MSVC propagates that to inherited std::map
+    // members, so contains() would be imported from boost_program_options.dll,
+    // which doesn't export it. With static Boost (the default) there is no DLL
+    // and contains() compiles as ordinary inline STL code; with dynamic Boost
+    // we fall back to the portable count(). The TIMESTAMP_USE_STATIC_BOOST
+    // macro is defined by CMake only in the static configuration.
+#ifdef TIMESTAMP_USE_STATIC_BOOST
     if (var_map.contains("help")) {
+#else
+    // NOLINTNEXTLINE(readability-container-contains)
+    if (var_map.count("help") != 0) {
+#endif
         std::cout << desc;
         std::exit(0);
     }
 
     po::notify(var_map);
 
+#ifdef TIMESTAMP_USE_STATIC_BOOST
     if (!var_map.contains("search-dirs")) {
+#else
+    // NOLINTNEXTLINE(readability-container-contains)
+    if (var_map.count("search-dirs") == 0) {
+#endif
         config.directories = {"."};
     } else {
         config.directories = var_map["search-dirs"].as<std::vector<std::string>>();
